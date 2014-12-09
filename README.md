@@ -1,5 +1,5 @@
 # Introduction #
-This tool allows you to run SQL Queries across different databases. It may be useful for cases where you need to run some upgrade scripts.
+This tool allows you to run SQL Queries across different MS SQL databases. It may be useful for cases where you need to run some upgrade scripts.
 
 # Requirements #
 You need to have the following files in your root folder (relative to the executable)
