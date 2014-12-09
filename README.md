@@ -16,7 +16,7 @@ The `config.json` file must be of the format:
 You can have any amount of *.sql files in the root folder of your application. They will all be grabbed by the application and executed across all databases.
 
 # Usage #
-You can either download the solution and build it from source, or you can just download the binary file `MDSE.zip`.
+You can either download the solution and build it from source, or you can just download the binary file [MDSE.zip](https://github.com/cdemi/MultipleDatabaseScriptExecutor/raw/master/MDSE.zip).
 
 After you have downloaded (or compiled) these files, you can just execute `MDSE.exe`. The application will read `config.json` and any `*.sql` files located at the root of your application.
 
