@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace App
 {
-    public class Config
+    public class Connection
     {
-        public List<string> ConnectionStrings { get; set; }
+        public string ConnectionString { get; set; }
+        public Dictionary<string, string> Parameters { get; set; }
     }
+
 
     internal class Program
     {
@@ -20,21 +24,21 @@ namespace App
         {
             if (File.Exists(configFile))
             {
-                var config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configFile));
-                string[] sqlFiles = Directory.GetFiles(".", "*.sql");
+                var connections = JsonConvert.DeserializeObject<List<Connection>>(File.ReadAllText(configFile));
+                var sqlFiles = Directory.GetFiles(".", "*.sql").Select(f=>new FileInfo(f)).OrderBy(f=>f.Name);
 
-                foreach (string sqlFile in sqlFiles)
+                foreach (var sqlFile in sqlFiles)
                 {
-                    var sqlFileInfo = new FileInfo(sqlFile);
-                    string sql = File.ReadAllText(sqlFile);
-                    Console.WriteLine(sqlFileInfo.Name + ":");
-                    foreach (string connectionString in config.ConnectionStrings)
+                    string sql = File.ReadAllText(sqlFile.FullName);
+                    Console.WriteLine(sqlFile.Name + ":");
+                    foreach (var connection in connections)
                     {
-                        using (var sqlConnection = new SqlConnection(connectionString))
+                        using (var sqlConnection = new SqlConnection(connection.ConnectionString))
                         {
                             Console.Write(" - " + sqlConnection.Database);
                             try
                             {
+                                var variableSQL = replaceVariables(sql, connection.Parameters);
                                 using (var sqlCommand = new SqlCommand(sql, sqlConnection))
                                 {
                                     var stopwatch = new Stopwatch();
@@ -48,7 +52,7 @@ namespace App
                             }
                             catch (Exception ex)
                             {
-                                string fileName = Path.GetFileNameWithoutExtension(sqlFileInfo.Name) + "_" +
+                                string fileName = Path.GetFileNameWithoutExtension(sqlFile.Name) + "_" +
                                                   sqlConnection.Database + "_" + DateTime.Now.ToString("yyyyMMdd") +
                                                   "_Error.txt";
                                 File.WriteAllText(fileName, ex.ToString());
@@ -65,14 +69,40 @@ namespace App
             else
             {
                 File.WriteAllText(configFile,
-                    JsonConvert.SerializeObject(new Config
-                    {
-                        ConnectionStrings = new List<string> {"ConnectionString1", "ConnectionString2"}
+                    JsonConvert.SerializeObject(new List<Connection>
+                        {
+                            new Connection
+                            {
+                                ConnectionString = "ConnectionString1",
+                                Parameters = new Dictionary<string, string>
+                                {
+                                    {"Parameter1","Value1"},
+                                    {"Parameter2","Value2"}
+                                }
+                            },
+                            new Connection
+                            {
+                                ConnectionString = "ConnectionString2"
+                            }
                     }));
                 Console.WriteLine("You need to put in your connection strings in '{0}'", configFile);
             }
 
             Console.ReadKey();
+        }
+        private const string variableTagRegex = @"(\[)(.+?)(\])";
+        private static string replaceVariables(string originalString, Dictionary<string, string> variables)
+        {
+            if (variables == null)
+                return originalString;
+
+            var dict = new Dictionary<string, string>(variables, StringComparer.InvariantCultureIgnoreCase);
+            return Regex.Replace(originalString, variableTagRegex, match =>
+            {
+                string key = match.Groups[2].Value.ToLower();
+
+                return dict.ContainsKey(key) ? dict[key] : match.Value;
+            });
         }
     }
 }
