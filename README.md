@@ -32,7 +32,7 @@ You can have any amount of *.sql files in the root folder of your application. T
 **These files are processed in alphabetical order**. This means that it is possible to run scripts in a specific order you define; you just have to name the files in ascending order. This is useful in cases where you are upgrading a database over a series of versions and you need to ensure that all upgrades are executed in order.
 
 ## Usage
-You can either download the solution and build it from source, or you can just download the binary file [MDSE.zip](raw/MDSE.zip).
+You can either download the solution and build it from source, or you can just download the binary file [MDSE.zip](MDSE.zip?raw=true).
 
 After you have downloaded (or compiled) these files, you can just execute `MDSE.exe`. The application will read `config.json` and any `*.sql` files located at the root of your application.
 
