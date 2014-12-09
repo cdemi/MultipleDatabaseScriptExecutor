@@ -24,7 +24,7 @@ The `config.json` file must be of the format:
     }
 ]
 ```
-The `Parameters` can be left empty if you are not using parameters in your SQL Queries. For more information on how to use parameters you can check [the parameters section below](#Parameters).
+The `Parameters` can be left empty if you are not using parameters in your SQL Queries. For more information on how to use parameters you can check [the parameters section below](#parameters).
 
 ### *.sql files
 You can have any amount of *.sql files in the root folder of your application. They will all be grabbed by the application and executed across all databases.
